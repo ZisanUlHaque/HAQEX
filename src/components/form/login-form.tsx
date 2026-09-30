@@ -12,12 +12,13 @@ import {
 } from "../ui/field";
 import { useState } from "react";
 import { Eye, EyeClosed } from "lucide-react";
-import { useLogin } from "@/hooks";
+import {  useLogin } from "@/hooks";
 import { useRouter } from "next/navigation";
 import { toast } from "../ui/toast";
 import { Spinner } from "../ui/spinner";
 import Link from "next/link";
 import { LoginZodSchema } from "@/validation";
+import GoogleLoginComponent from "../modules/google-login/GoogleLogin";
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -27,13 +28,10 @@ export default function LoginForm() {
 
   const form = useForm({
     defaultValues: {
-      email: "mirhussain@gmail.com",
-      password: "@Doctor123456",
+      email: "user@gmail.com",
+      password: "password123@",
     },
-    // defaultValues: {
-    //   email: "superadmin@gmail.com",
-    //   password: "Super@admin12345",
-    // },
+
     validators: {
       onSubmit: LoginZodSchema,
     },
@@ -156,6 +154,7 @@ export default function LoginForm() {
 
       <FieldSeparator>Or continue with</FieldSeparator>
 
+      <GoogleLoginComponent />
 
       <div className="text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}

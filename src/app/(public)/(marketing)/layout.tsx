@@ -29,9 +29,10 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
         geistSans.variable,
         geistMono.variable,
         notoSans.variable,
-        nunitoSansHeading.variable
+        nunitoSansHeading.variable,
       )}
     >
+      <Header />
       <main className="flex-1">{children}</main>
       <Footer />
     </div>
