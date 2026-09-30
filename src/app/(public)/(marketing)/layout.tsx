@@ -1,5 +1,6 @@
 
 import Footer from "@/components/layout/public/Footer";
+import Header from "@/components/layout/public/Header";
 import { cn } from "@/lib/utils";
 import { Geist, Geist_Mono, Noto_Sans, Nunito_Sans } from "next/font/google";
 import { ReactNode } from "react";
