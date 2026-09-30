@@ -1,5 +1,3 @@
-import Footer from "@/components/layout/public/Footer";
-import Header from "@/components/layout/public/Header";
 import { cn } from "@/lib/utils";
 import { Geist, Geist_Mono, Noto_Sans, Nunito_Sans } from "next/font/google";
 import { ReactNode } from "react";
@@ -21,11 +19,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default function PublicLayout({ children }: { children: ReactNode }) {
+export default function AuthenticationLayout({ children }: { children: ReactNode }) {
   return (
     <div
       className={cn(
-        "min-h-screen flex flex-col font-sans antialiased",
+        "min-h-full flex flex-col font-sans antialiased",
         geistSans.variable,
         geistMono.variable,
         notoSans.variable,
@@ -33,7 +31,6 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
       )}
     >
       <main className="flex-1">{children}</main>
-      <Footer />
     </div>
   );
 }
