@@ -1,4 +1,2 @@
-export interface LoginPayload {
-  email: string;
-  password: string;
-}
+export * from "./auth.type";
+export * from "./user.type";
