@@ -12,6 +12,7 @@ export default function Header() {
     { name: "Home", url: "/" },
     { name: "Contact", url: "/contact" },
     { name: "About us", url: "/about-us" },
+    { name: "Pricing", url: "/pricing" },
   ];
 
 
