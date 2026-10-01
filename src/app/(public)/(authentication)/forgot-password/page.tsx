@@ -9,21 +9,25 @@ export default function ForgotPasswordPage() {
         <div className="flex justify-center gap-2 md:justify-start">
           <Logo />
         </div>
+
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
             <ForgotPasswordForm />
           </div>
         </div>
       </div>
+
       <div className="relative hidden bg-muted lg:block">
         <Image
           src="/forgot.png"
           alt="HAQEX"
           fill
           priority
+          sizes="50vw"
           className="object-cover dark:brightness-[0.2] dark:grayscale"
         />
       </div>
     </div>
   );
 }
+
