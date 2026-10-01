@@ -10,7 +10,7 @@ import Link from "next/link";
 export default function Header() {
   const routes = [
     { name: "Home", url: "/" },
-    { name: "Doctor", url: "/doctors" },
+    { name: "Contact", url: "/contact" },
     { name: "About us", url: "/about-us" },
   ];
 
