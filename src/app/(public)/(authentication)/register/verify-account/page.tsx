@@ -6,7 +6,6 @@ import { Suspense } from "react";
 export default function VerifyAccountPage() {
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
-      {/* 1. Left Side: Form */}
       <div className="flex flex-col gap-4 p-6 md:p-10">
         <div className="flex justify-center gap-2 md:justify-start">
           <Logo />
@@ -20,7 +19,6 @@ export default function VerifyAccountPage() {
         </div>
       </div>
 
-      {/* 2. Right Side: Hero Image */}
       <div className="relative hidden bg-muted lg:block">
         <Image
           src="/login.png"
