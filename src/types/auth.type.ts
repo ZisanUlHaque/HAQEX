@@ -15,3 +15,13 @@ export interface VerifyAccountPayload {
   email: string;
   otp: string;
 }
+
+export type ForgotPasswordPayload = {
+  email: string;
+};
+
+export type ResetPasswordPayload = {
+  email: string;
+  otp: string;
+  newPassword: string;
+};
