@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/field";
 import { cn } from "@/lib/utils";
 import { toast } from "@/components/ui/toast";
-import { useCalculatePricing } from "@/hooks/pricing.hooks";
+import { useCalculatePricing } from "@/hooks";
 
 const PACKAGE_TYPES = [
   {
