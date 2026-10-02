@@ -1,6 +1,8 @@
 export type UserRole = "CUSTOMER" | "ADMIN" | "COURIER";
 export type UserStatus = "ACTIVE" | "SUSPENDED";
 
+export type CourierAvailabilityStatus = "AVAILABLE" | "BUSY" | "OFFLINE";
+
 export interface User {
   id: string;
   name: string;
@@ -10,6 +12,7 @@ export interface User {
   emailVerified: boolean;
   role: UserRole;
   status: UserStatus;
+  availabilityStatus?: CourierAvailabilityStatus;
   needPasswordChange: boolean;
   imageUrl: null | string;
   imagePublicId: null | string;

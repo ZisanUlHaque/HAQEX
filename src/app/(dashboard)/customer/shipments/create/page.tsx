@@ -14,13 +14,11 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Field,
-  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
@@ -45,6 +43,47 @@ const PACKAGE_TYPES: { value: PackageType; label: string }[] = [
   { value: "HAZARDOUS", label: "Hazardous" },
 ];
 
+// Helper Component for Step 2 to Auto-detect zone based on City mismatch
+function AutoZoneDetector({ form }: { form: any }) {
+  return (
+    <form.Subscribe
+      selector={(s: any) => ({
+        pCity: s.values.pickupAddress.city,
+        dCity: s.values.deliveryAddress.city,
+        isInter: s.values.isInterCity,
+      })}
+    >
+      {({ pCity, dCity, isInter }: any) => {
+        const p = (pCity || "").trim().toLowerCase();
+        const d = (dCity || "").trim().toLowerCase();
+        if (!p || !d) return null;
+
+        const shouldInter = p !== d;
+        if (shouldInter !== isInter) {
+          queueMicrotask(() => {
+            form.setFieldValue("isInterCity", shouldInter);
+            form.setFieldValue("deliveryFee", shouldInter ? 120 : 60);
+          });
+        }
+
+        return (
+          <p className="mt-4 rounded-xl border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+            Cities detected: <strong className="text-foreground">{pCity}</strong>
+            {" → "}
+            <strong className="text-foreground">{dCity}</strong>
+            {" · "}
+            Delivery Fee auto-set to{" "}
+            <strong className="text-foreground">
+              ৳{shouldInter ? 120 : 60}
+            </strong>
+            {shouldInter ? " (Inter-City)" : " (Within City)"}
+          </p>
+        );
+      }}
+    </form.Subscribe>
+  );
+}
+
 export default function CreateShipmentPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -56,12 +95,12 @@ export default function CreateShipmentPage() {
       packageType: "SMALL_PARCEL" as PackageType,
       weight: 1,
       quantity: 1,
-      declaredValue: 500,
-      deliveryFee: 60,
+      declaredValue: 70, // Default declared value (editable)
+      deliveryFee: 60, // Default delivery fee for Within City
       codAmount: 0,
       specialInstructions: "",
       pickupSchedule: "",
-      isInterCity: false,
+      isInterCity: false, // Default is local
       pickupAddress: {
         name: "Sender Name",
         phone: "01712345678",
@@ -73,17 +112,17 @@ export default function CreateShipmentPage() {
       deliveryAddress: {
         name: "Receiver Name",
         phone: "01812345678",
-        addressLine: "Station Road, Agrabad",
-        city: "Chittagong",
-        district: "Chittagong",
-        postalCode: "4000",
+        addressLine: "House 45, Road 2",
+        city: "Dhaka", // Same city default
+        district: "Dhaka",
+        postalCode: "1207",
       },
       items: [
         {
-          description: "Documents / Cloths",
+          description: "General Items",
           quantity: 1,
           weight: 1,
-          declaredValue: 500,
+          declaredValue: 70,
         },
       ],
     },
@@ -98,9 +137,9 @@ export default function CreateShipmentPage() {
       });
     },
     onSubmit: async ({ value }) => {
-      let finalFee = value.deliveryFee || 60;
+      let finalFee = value.deliveryFee || (value.isInterCity ? 120 : 60);
 
-      // Calculate price via API
+      // Calculate any extra weight fee via API (Optional)
       try {
         const res: any = await calcPrice({
           weight: value.weight || 1,
@@ -122,7 +161,7 @@ export default function CreateShipmentPage() {
         packageType: value.packageType,
         weight: Number(value.weight) || 1,
         quantity: Number(value.quantity) || 1,
-        declaredValue: Number(value.declaredValue) || undefined,
+        declaredValue: Number(value.declaredValue) || 0,
         deliveryFee: finalFee,
         codAmount: Number(value.codAmount) || undefined,
         specialInstructions: value.specialInstructions || undefined,
@@ -235,7 +274,6 @@ export default function CreateShipmentPage() {
         onSubmit={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          // Only trigger actual form submit if we are on the Review Step (Step 3)
           if (step === 3) {
             form.handleSubmit();
           }
@@ -346,13 +384,17 @@ export default function CreateShipmentPage() {
                   <FieldLabel>Delivery Zone</FieldLabel>
                   <div className="flex gap-3">
                     {[
-                      { val: false, label: "Within City (Local)" },
-                      { val: true, label: "Inter-City (Nationwide)" },
+                      { val: false, label: "Within City (৳60 Local)", fee: 60 },
+                      { val: true, label: "Inter-City (৳120 Nationwide)", fee: 120 },
                     ].map((opt) => (
                       <button
                         key={String(opt.val)}
                         type="button"
-                        onClick={() => field.handleChange(opt.val)}
+                        onClick={() => {
+                          field.handleChange(opt.val);
+                          // ✅ Auto-set delivery fee based on zone
+                          form.setFieldValue("deliveryFee", opt.fee);
+                        }}
                         className={cn(
                           "flex-1 rounded-xl border px-3 py-3 text-sm font-medium transition-all",
                           field.state.value === opt.val
@@ -364,6 +406,17 @@ export default function CreateShipmentPage() {
                       </button>
                     ))}
                   </div>
+
+                  {/* Real-time Delivery Fee display */}
+                  <form.Subscribe selector={(s) => s.values.deliveryFee}>
+                    {(fee) => (
+                      <p className="mt-1.5 text-xs text-muted-foreground">
+                        Delivery fee set to{" "}
+                        <strong className="text-foreground">৳{fee}</strong>{" "}
+                        (Declared value does not affect delivery charge)
+                      </p>
+                    )}
+                  </form.Subscribe>
                 </Field>
               )}
             </form.Field>
@@ -437,7 +490,7 @@ export default function CreateShipmentPage() {
                           }
                         />
                       </div>
-                      <div className="col-span-2 sm:col-span-1 flex items-center justify-center">
+                      <div className="col-span-2 flex items-center justify-center sm:col-span-1">
                         {field.state.value.length > 1 && (
                           <button
                             type="button"
@@ -585,6 +638,9 @@ export default function CreateShipmentPage() {
                 </div>
               );
             })}
+
+            {/* Auto Zone/Fee Detection Message based on addresses */}
+            <AutoZoneDetector form={form} />
           </div>
         )}
 
@@ -592,58 +648,72 @@ export default function CreateShipmentPage() {
         {step === 3 && (
           <form.Subscribe
             selector={(s) => s.values}
-            children={(v) => (
-              <div className="space-y-4 text-sm">
-                <ReviewRow
-                  label="Package Type"
-                  value={v.packageType.replaceAll("_", " ")}
-                />
-                <ReviewRow
-                  label="Weight & Qty"
-                  value={`${v.weight} kg · ${v.quantity} item(s)`}
-                />
-                <ReviewRow
-                  label="Delivery Zone"
-                  value={
-                    v.isInterCity
-                      ? "Inter-City (Nationwide)"
-                      : "Within City (Local)"
-                  }
-                />
-                <ReviewRow
-                  label="COD Amount"
-                  value={v.codAmount ? `৳${v.codAmount}` : "None"}
-                />
-                <ReviewRow
-                  label="Pickup Address"
-                  value={`${v.pickupAddress.name} (${v.pickupAddress.phone}) — ${v.pickupAddress.addressLine}, ${v.pickupAddress.city}`}
-                />
-                <ReviewRow
-                  label="Delivery Address"
-                  value={`${v.deliveryAddress.name} (${v.deliveryAddress.phone}) — ${v.deliveryAddress.addressLine}, ${v.deliveryAddress.city}`}
-                />
-                <ReviewRow
-                  label="Items Description"
-                  value={
-                    v.items
-                      .map((i) => i.description)
-                      .filter(Boolean)
-                      .join(", ") || "General Package"
-                  }
-                />
+            children={(v) => {
+              return (
+                <div className="space-y-4 text-sm">
+                  <ReviewRow
+                    label="Package Type"
+                    value={v.packageType.replaceAll("_", " ")}
+                  />
+                  <ReviewRow
+                    label="Weight & Qty"
+                    value={`${v.weight} kg · ${v.quantity} item(s)`}
+                  />
+                  <ReviewRow
+                    label="Declared Value"
+                    value={`৳${v.declaredValue ?? 0}`}
+                  />
+                  <ReviewRow
+                    label="Delivery Zone"
+                    value={
+                      v.isInterCity
+                        ? "Inter-City (Nationwide)"
+                        : "Within City (Local)"
+                    }
+                  />
+                  <ReviewRow
+                    label="Delivery Fee"
+                    value={`৳${v.deliveryFee ?? (v.isInterCity ? 120 : 60)}`}
+                  />
+                  <ReviewRow
+                    label="COD Amount"
+                    value={v.codAmount ? `৳${v.codAmount}` : "None"}
+                  />
+                  <ReviewRow
+                    label="Pickup Address"
+                    value={`${v.pickupAddress.name} (${v.pickupAddress.phone}) — ${v.pickupAddress.addressLine}, ${v.pickupAddress.city}`}
+                  />
+                  <ReviewRow
+                    label="Delivery Address"
+                    value={`${v.deliveryAddress.name} (${v.deliveryAddress.phone}) — ${v.deliveryAddress.addressLine}, ${v.deliveryAddress.city}`}
+                  />
+                  <ReviewRow
+                    label="Items Description"
+                    value={
+                      v.items
+                        .map((i) => i.description)
+                        .filter(Boolean)
+                        .join(", ") || "General Package"
+                    }
+                  />
 
-                <div className="rounded-2xl border border-chart-1/30 bg-chart-1/10 p-4 text-xs text-foreground space-y-1">
-                  <p className="font-semibold flex items-center gap-1.5 text-chart-1">
-                    <Check className="h-4 w-4" /> Ready to submit
-                  </p>
-                  <p className="text-muted-foreground">
-                    Upon confirmation, your shipment will be created with status{" "}
-                    <strong className="text-foreground">PENDING_PAYMENT</strong>
-                    .
-                  </p>
+                  <div className="space-y-1 rounded-2xl border border-chart-1/30 bg-chart-1/10 p-4 text-xs text-foreground">
+                    <p className="flex items-center gap-1.5 font-semibold text-chart-1">
+                      <Check className="h-4 w-4" /> Ready to submit
+                    </p>
+                    <p className="text-muted-foreground">
+                      Total Payable Delivery Charge:{" "}
+                      <strong className="text-foreground">
+                        ৳{v.deliveryFee ?? (v.isInterCity ? 120 : 60)}
+                      </strong>
+                      . Status will be set to{" "}
+                      <strong className="text-foreground">PENDING_PAYMENT</strong>
+                      .
+                    </p>
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            }}
           />
         )}
 
@@ -668,7 +738,7 @@ export default function CreateShipmentPage() {
                 e.preventDefault();
                 setStep((s) => Math.min(3, s + 1));
               }}
-              className="bg-chart-1 text-emerald-950 hover:bg-chart-2 font-semibold"
+              className="bg-chart-1 px-6 font-semibold text-emerald-950 hover:bg-chart-2"
             >
               Continue <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
@@ -676,7 +746,7 @@ export default function CreateShipmentPage() {
             <Button
               type="submit"
               disabled={isPending}
-              className="bg-chart-1 text-emerald-950 hover:bg-chart-2 font-bold px-6"
+              className="bg-chart-1 px-6 font-bold text-emerald-950 hover:bg-chart-2"
             >
               {isPending ? (
                 <>
@@ -698,9 +768,9 @@ export default function CreateShipmentPage() {
 
 function ReviewRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 border-b border-border/60 pb-2.5">
-      <span className="text-muted-foreground font-medium">{label}</span>
-      <span className="text-left sm:text-right font-semibold text-foreground max-w-md">
+    <div className="flex flex-col justify-between gap-2 border-b border-border/60 pb-2.5 sm:flex-row sm:items-start">
+      <span className="font-medium text-muted-foreground">{label}</span>
+      <span className="max-w-md text-left font-semibold text-foreground sm:text-right">
         {value}
       </span>
     </div>
