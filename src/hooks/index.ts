@@ -4,5 +4,5 @@ export * from "./shipment.hook";
 export * from "./payment.hook";
 export * from "./tracking.hook";
 export * from "./user.hook";
-export * from "./courier.hook";
+export * from "./admin.hook";
 

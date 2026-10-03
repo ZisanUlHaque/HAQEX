@@ -4,4 +4,4 @@ export * from "./shipment.api";
 export * from "./payment.api";
 export * from "./shipment.api";
 export * from "./user.api";
-export * from "./courier.api";
+export * from "./admin.api";

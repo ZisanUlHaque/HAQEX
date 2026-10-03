@@ -4,3 +4,4 @@ export * from "./pricing.type";
 export * from "./shipment.type";
 export * from "./tracking";
 export * from "./payment";
+export * from "./admin";

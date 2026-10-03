@@ -30,13 +30,7 @@ const ROLES = [
     label: "Customer",
     description: "Send & track parcels",
     icon: User,
-  },
-  {
-    value: "COURIER" as const,
-    label: "Courier",
-    description: "Deliver & earn",
-    icon: Bike,
-  },
+  }
 ];
 
 export function RegisterForm() {
