@@ -1,19 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { Activity, ArrowRight, PackageSearch, UserRound, Warehouse } from "lucide-react";
+import { Activity, ArrowRight, MapPin, PackageSearch, UserRound, Warehouse } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCourierAnalytics, useCourierProfile, useCourierShipments, useGetMe } from "@/hooks";
 import {
   getAnalyticsSeries,
   getErrorMessage,
   QueryError,
+  responseList,
   responseRecord,
   unwrapData,
 } from "@/components/dashboard/admin-ui";
 import AnalyticsChart from "@/components/dashboard/analytics-chart";
 import { CourierMetrics, getCourierMetrics } from "@/components/dashboard/courier-metrics";
-import type { CourierShipmentsResponse } from "@/types/courier";
+import type { CourierShipment } from "@/types/courier";
 import { StatusBadge } from "@/components/modules/shipments/StatusBadge";
 
 type CurrentUser = { name?: string };
@@ -75,9 +76,8 @@ export default function CourierOverviewPage() {
   const metrics = getCourierMetrics(analytics.data);
   const series = getAnalyticsSeries(analytics.data);
   const user = responseRecord<CurrentUser>(me.data);
-  const assignmentData = responseRecord<CourierShipmentsResponse>(assignments.data);
   const courierProfile = responseRecord<{ availabilityStatus?: string }>(courierProfileQuery.data);
-  const assignedShipments = Array.isArray(assignmentData?.data) ? assignmentData.data : [];
+  const assignedShipments = responseList<CourierShipment>(assignments.data);
   const activeStatuses = [
     "OUT_FOR_DELIVERY",
     "DELIVERY_FAILED",

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ArrowRight, MapPin, Package, Search } from "lucide-react";
-import type { CourierShipment, CourierShipmentsResponse } from "@/types/courier";
+import type { CourierShipment } from "@/types/courier";
 import type { ShipmentStatus } from "@/types";
 import { useCourierShipments } from "@/hooks";
 import { StatusBadge } from "@/components/modules/shipments/StatusBadge";
@@ -11,7 +11,8 @@ import {
   EmptyState,
   getErrorMessage,
   QueryError,
-  responseRecord,
+  responseList,
+  responseMeta,
 } from "@/components/dashboard/admin-ui";
 import { Button } from "@/components/ui/button";
 
@@ -37,9 +38,11 @@ export function CourierShipmentList({ history = false }: { history?: boolean }) 
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
   const query = useCourierShipments({ page, limit: PAGE_SIZE, ...(status ? { status: status as ShipmentStatus } : {}) });
-  const result = responseRecord<CourierShipmentsResponse>(query.data);
-  const shipments = Array.isArray(result?.data) ? result.data : [];
-  const totalPages = Math.max(result?.meta?.totalPages ?? 1, 1);
+  const shipments = responseList<CourierShipment>(query.data);
+  const meta = responseMeta(query.data);
+  const total = typeof meta?.total === "number" ? meta.total : shipments.length;
+  const pageSize = typeof meta?.limit === "number" ? meta.limit : PAGE_SIZE;
+  const totalPages = Math.max(typeof meta?.totalPages === "number" ? meta.totalPages : 1, 1);
   const visible = useMemo(() => {
     const needle = search.trim().toLowerCase();
     return shipments.filter((shipment) => {
@@ -95,9 +98,9 @@ export function CourierShipmentList({ history = false }: { history?: boolean }) 
         </div>
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs text-muted-foreground">
-            {result?.meta?.total ?? shipments.length} assigned {result?.meta?.total === 1 ? "shipment" : "shipments"}
-            {result?.meta?.limit ? ` · ${result.meta.limit} per page` : ""}
-            {result?.meta?.totalPages && result.meta.totalPages > 1 ? ` · API page ${page} of ${result.meta.totalPages}` : ""}
+            {total} assigned {total === 1 ? "shipment" : "shipments"}
+            · {pageSize} per page
+            {totalPages > 1 ? ` · API page ${page} of ${totalPages}` : ""}
           </p>
           {(search || status) && (
             <Button type="button" variant="ghost" className="h-9 rounded-lg px-3" onClick={resetFilters}>
