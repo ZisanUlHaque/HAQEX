@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowUpRight, RefreshCw } from "lucide-react";
 import { useAllPayments, usePayment, useVerifyPayment } from "@/hooks";
+import { useQueryClient } from "@tanstack/react-query";
 import type { Payment } from "@/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,9 +15,9 @@ import {
   isRecord,
   PageHeader,
   QueryError,
+  responseMeta,
   responseList,
   responseRecord,
-  SearchField,
   StatusPill,
   TablePager,
   unwrapData,
@@ -35,9 +36,17 @@ function formatDate(value?: string | null) {
 
 function PaymentDetails({ paymentId }: { paymentId: string }) {
   const query = usePayment(paymentId);
+  const queryClient = useQueryClient();
   const [verificationRequested, setVerificationRequested] = useState(false);
   const verificationQuery = useVerifyPayment(paymentId, verificationRequested);
   const payment = responseRecord<Payment>(query.data);
+  useEffect(() => {
+    if (!verificationQuery.isSuccess || verificationQuery.dataUpdatedAt === 0) return;
+    void queryClient.invalidateQueries({ queryKey: ["payment", paymentId] });
+    void queryClient.invalidateQueries({ queryKey: ["all-payments"] });
+    void queryClient.invalidateQueries({ queryKey: ["admin-stats"] });
+    void queryClient.invalidateQueries({ queryKey: ["admin-analytics"] });
+  }, [paymentId, queryClient, verificationQuery.dataUpdatedAt, verificationQuery.isSuccess]);
   if (query.isError) {
     return <QueryError message={getErrorMessage(query.error)} onRetry={() => void query.refetch()} />;
   }
@@ -136,35 +145,24 @@ function formatResponseValue(value: unknown): string {
 }
 
 export default function AdminPaymentsPage() {
-  const paymentsQuery = useAllPayments();
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("");
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
   const [page, setPage] = useState(1);
+  const [status, setStatus] = useState("");
+  const paymentsQuery = useAllPayments({
+    page,
+    limit: PAGE_SIZE,
+    status: status || undefined,
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  });
   const [selectedPayment, setSelectedPayment] = useState("");
   const payments = responseList<Payment>(paymentsQuery.data);
-  const filteredPayments = useMemo(() => {
-    const needle = search.trim().toLowerCase();
-    return payments.filter((payment) => {
-      const matchesSearch =
-        !needle ||
-        payment.id?.toLowerCase().includes(needle) ||
-        payment.transactionId?.toLowerCase().includes(needle) ||
-        payment.bkashPaymentId?.toLowerCase().includes(needle) ||
-        payment.shipment?.trackingNumber?.toLowerCase().includes(needle) ||
-        payment.customerId?.toLowerCase().includes(needle);
-      const created = Date.parse(payment.createdAt);
-      const matchesFrom = !fromDate || (Number.isFinite(created) && created >= Date.parse(`${fromDate}T00:00:00`));
-      const matchesTo = !toDate || (Number.isFinite(created) && created <= Date.parse(`${toDate}T23:59:59.999`));
-      return matchesSearch && (!status || payment.status === status) && matchesFrom && matchesTo;
-    });
-  }, [fromDate, payments, search, status, toDate]);
-  const totalPages = Math.max(1, Math.ceil(filteredPayments.length / PAGE_SIZE));
-  const pageRows = filteredPayments.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const meta = responseMeta(paymentsQuery.data);
+  const total = typeof meta?.total === "number" ? meta.total : payments.length;
+  const totalPages = typeof meta?.totalPages === "number" ? Math.max(meta.totalPages, 1) : Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const pageRows = payments;
 
   return (
-    <div className="mx-auto max-w-[1440px] space-y-7 px-4 py-7 sm:px-6 lg:px-9 lg:py-9">
+    <div className="mx-auto max-w-360 space-y-7 px-4 py-7 sm:px-6 lg:px-9 lg:py-9">
       <PageHeader
         eyebrow="Operations"
         title="Payments"
@@ -176,30 +174,24 @@ export default function AdminPaymentsPage() {
         }
       />
       <AdminSurface className="overflow-hidden">
-        <div className="grid gap-3 border-b border-border p-4 sm:grid-cols-2 xl:grid-cols-[minmax(210px,1fr)_170px_160px_160px_auto]">
-          <SearchField value={search} onChange={(value) => { setSearch(value); setPage(1); }} placeholder="Search payment, shipment or reference" />
+        <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">
           <select value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }} aria-label="Filter payments by status" className="h-10 rounded-xl border border-input bg-background px-3 text-sm">
             <option value="">All statuses</option>
             {paymentStatuses.map((item) => <option key={item} value={item}>{item}</option>)}
           </select>
-          <label className="flex h-10 items-center gap-2 rounded-xl border border-input bg-background px-3 text-xs text-muted-foreground">
-            From <input type="date" value={fromDate} onChange={(event) => { setFromDate(event.target.value); setPage(1); }} aria-label="Payments created from" className="min-w-0 bg-transparent text-foreground outline-none" />
-          </label>
-          <label className="flex h-10 items-center gap-2 rounded-xl border border-input bg-background px-3 text-xs text-muted-foreground">
-            To <input type="date" value={toDate} onChange={(event) => { setToDate(event.target.value); setPage(1); }} aria-label="Payments created until" className="min-w-0 bg-transparent text-foreground outline-none" />
-          </label>
-          <span className="self-center whitespace-nowrap px-1 text-xs text-muted-foreground">{filteredPayments.length} payments</span>
+          <span className="text-xs text-muted-foreground">{total} payments · newest first</span>
+          <p className="basis-full text-xs text-muted-foreground">The current payments API supports status filtering and pagination; search, method, and date filters are not provided.</p>
         </div>
         {paymentsQuery.isError ? (
           <div className="p-4"><QueryError message={getErrorMessage(paymentsQuery.error)} onRetry={() => void paymentsQuery.refetch()} /></div>
         ) : paymentsQuery.isLoading ? (
           <div className="space-y-3 p-5"><AdminSkeleton rows={6} /></div>
-        ) : filteredPayments.length === 0 ? (
-          <EmptyState title={payments.length === 0 ? "No payments returned" : "No matching payments"} description={payments.length === 0 ? "Payment records will appear here when returned by the API." : "Try changing the search, date range or status filters."} />
+        ) : payments.length === 0 ? (
+          <EmptyState title={total === 0 ? "No payments returned" : "No matching payments"} description={total === 0 ? "Payment records will appear here when returned by the API." : "Try another payment status."} />
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[870px] text-left text-sm">
+              <table className="w-full min-w-217.5 text-left text-sm">
                 <thead className="bg-muted/45 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   <tr>
                     <th className="px-5 py-3.5">Payment</th>

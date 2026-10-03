@@ -33,6 +33,17 @@ export function responseRecord<T>(value: unknown): T | undefined {
   return isRecord(record) ? (record as T) : undefined;
 }
 
+export function responseMeta(value: unknown) {
+  let current = value;
+  for (let depth = 0; depth < 4; depth += 1) {
+    if (!isRecord(current)) return undefined;
+    if (isRecord(current.meta)) return current.meta;
+    if (!("data" in current)) return undefined;
+    current = current.data;
+  }
+  return undefined;
+}
+
 export function getNumericMetrics(value: unknown) {
   const record = unwrapData(value);
   if (!isRecord(record)) return [];

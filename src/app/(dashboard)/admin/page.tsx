@@ -6,6 +6,7 @@ import {
   ArrowUpRight,
   BarChart3,
   CreditCard,
+  CircleAlert,
   Package,
   Users,
 } from "lucide-react";
@@ -18,8 +19,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useAdminAnalytics, useAdminStats, useAllShipments } from "@/hooks";
-import type { Shipment } from "@/types";
+import { useAdminAnalytics, useAdminStats, useAllPayments, useAllShipments } from "@/hooks";
+import type { Payment, Shipment } from "@/types";
 import { StatusBadge } from "@/components/modules/shipments/StatusBadge";
 import {
   AdminSkeleton,
@@ -30,7 +31,9 @@ import {
   getNumericMetrics,
   PageHeader,
   QueryError,
+  responseMeta,
   responseList,
+  StatusPill,
 } from "@/components/dashboard/admin-ui";
 
 const metricIcons = [Users, Package, CreditCard, Activity];
@@ -49,15 +52,21 @@ export default function AdminDashboardPage() {
   const statsQuery = useAdminStats();
   const analyticsQuery = useAdminAnalytics();
   const shipmentsQuery = useAllShipments();
+  const failedShipmentsQuery = useAllShipments({ status: "DELIVERY_FAILED", page: 1, limit: 5, sortBy: "updatedAt", sortOrder: "desc" });
+  const pendingPaymentsQuery = useAllPayments({ status: "PENDING", page: 1, limit: 5, sortBy: "createdAt", sortOrder: "desc" });
   const metrics = getNumericMetrics(statsQuery.data);
   const analytics = getAnalyticsSeries(analyticsQuery.data);
   const recentShipments = responseList<Shipment>(shipmentsQuery.data)
     .slice()
     .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt))
     .slice(0, 5);
+  const failedShipments = responseList<Shipment>(failedShipmentsQuery.data);
+  const pendingPayments = responseList<Payment>(pendingPaymentsQuery.data);
+  const failedMeta = responseMeta(failedShipmentsQuery.data);
+  const pendingPaymentMeta = responseMeta(pendingPaymentsQuery.data);
 
   return (
-    <div className="mx-auto max-w-[1440px] space-y-8 px-4 py-7 sm:px-6 lg:px-9 lg:py-9">
+    <div className="mx-auto max-w-360 space-y-8 px-4 py-7 sm:px-6 lg:px-9 lg:py-9">
       <PageHeader
         eyebrow="Platform overview"
         title="Good day. Here’s your operation."
@@ -81,8 +90,8 @@ export default function AdminDashboardPage() {
         />
       ) : statsQuery.isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {Array.from({ length: 4 }, (_, index) => (
-            <div key={index} className="h-36 animate-pulse rounded-2xl border border-border bg-card p-5">
+          {["one", "two", "three", "four"].map((skeleton) => (
+            <div key={skeleton} className="h-36 animate-pulse rounded-2xl border border-border bg-card p-5">
               <div className="h-9 w-9 rounded-xl bg-muted" />
               <div className="mt-5 h-7 w-2/5 rounded bg-muted" />
               <div className="mt-2 h-3 w-3/5 rounded bg-muted" />
@@ -97,7 +106,7 @@ export default function AdminDashboardPage() {
               <AdminSurface key={metric.key} className="group p-5 transition duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md">
                 <div className="flex items-start justify-between">
                   <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary transition group-hover:bg-primary group-hover:text-primary-foreground">
-                    <Icon className="h-[18px] w-[18px]" />
+                    <Icon className="h-4.5 w-4.5" />
                   </span>
                   <span className="rounded-full bg-muted px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                     Live
@@ -119,6 +128,83 @@ export default function AdminDashboardPage() {
           />
         </AdminSurface>
       )}
+
+      <section aria-labelledby="admin-attention-heading" className="space-y-4">
+        <div>
+          <h2 id="admin-attention-heading" className="text-lg font-semibold tracking-tight">Operational attention</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Exceptions and unsettled transactions returned by the operations APIs.</p>
+        </div>
+        <div className="grid gap-4 xl:grid-cols-2">
+          <AdminSurface className="overflow-hidden">
+            <div className="flex items-center justify-between border-b border-border px-5 py-4">
+              <div className="flex items-center gap-2">
+                <CircleAlert className="h-4 w-4 text-amber-600" />
+                <h3 className="font-semibold">Failed deliveries</h3>
+              </div>
+              <span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                {typeof failedMeta?.total === "number" ? failedMeta.total : failedShipments.length}
+              </span>
+            </div>
+            {failedShipmentsQuery.isError ? (
+              <div className="p-4"><QueryError message={getErrorMessage(failedShipmentsQuery.error)} onRetry={() => void failedShipmentsQuery.refetch()} /></div>
+            ) : failedShipmentsQuery.isLoading ? (
+              <div className="p-5"><AdminSkeleton rows={3} /></div>
+            ) : failedShipments.length === 0 ? (
+              <EmptyState title="No failed deliveries" description="No failed-delivery shipments were returned by the API." />
+            ) : (
+              <ul className="divide-y divide-border">
+                {failedShipments.map((shipment) => (
+                  <li key={shipment.id}>
+                    <Link href={`/admin/shipments/${shipment.id}`} className="flex min-h-16 items-center justify-between gap-3 px-5 py-3 hover:bg-muted/40">
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-semibold">{shipment.trackingNumber}</span>
+                        <span className="mt-1 block truncate text-xs text-muted-foreground">{shipment.customer?.name || "Customer"}</span>
+                      </span>
+                      <StatusBadge status={shipment.status} />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <Link href="/admin/shipments" className="block border-t border-border px-5 py-3 text-xs font-semibold text-primary hover:bg-muted/40">
+              Open shipment management
+            </Link>
+          </AdminSurface>
+          <AdminSurface className="overflow-hidden">
+            <div className="flex items-center justify-between border-b border-border px-5 py-4">
+              <div className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4 text-amber-600" />
+                <h3 className="font-semibold">Pending payments</h3>
+              </div>
+              <span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                {typeof pendingPaymentMeta?.total === "number" ? pendingPaymentMeta.total : pendingPayments.length}
+              </span>
+            </div>
+            {pendingPaymentsQuery.isError ? (
+              <div className="p-4"><QueryError message={getErrorMessage(pendingPaymentsQuery.error)} onRetry={() => void pendingPaymentsQuery.refetch()} /></div>
+            ) : pendingPaymentsQuery.isLoading ? (
+              <div className="p-5"><AdminSkeleton rows={3} /></div>
+            ) : pendingPayments.length === 0 ? (
+              <EmptyState title="No pending payments" description="No pending transactions were returned by the payment API." />
+            ) : (
+              <ul className="divide-y divide-border">
+                {pendingPayments.map((payment) => (
+                  <li key={payment.id} className="flex min-h-16 items-center justify-between gap-3 px-5 py-3">
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-semibold">{payment.shipment?.trackingNumber || payment.shipmentId}</span>
+                      <span className="mt-1 block truncate text-xs text-muted-foreground">{payment.currency} {new Intl.NumberFormat().format(payment.amount)}</span>
+                    </span>
+                    <StatusPill value={payment.status} />
+                  </li>
+                ))}
+              </ul>
+            )}
+            <Link href="/admin/payments" className="block border-t border-border px-5 py-3 text-xs font-semibold text-primary hover:bg-muted/40">
+              Open payment management
+            </Link>
+          </AdminSurface>
+        </div>
+      </section>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(300px,0.85fr)]">
         <AdminSurface className="min-w-0 p-5 sm:p-6">

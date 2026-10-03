@@ -25,6 +25,18 @@ export function useAddTrackingEvent() {
       qc.invalidateQueries({ queryKey: ["shipment", vars.shipmentId] });
       qc.invalidateQueries({ queryKey: ["tracking"] });
       qc.invalidateQueries({ queryKey: ["my-shipments"] });
+      qc.invalidateQueries({ queryKey: ["courier-analytics"] });
+      qc.invalidateQueries({ queryKey: ["courier-shipments"] });
+      qc.invalidateQueries({ queryKey: ["admin-stats"] });
+      qc.invalidateQueries({ queryKey: ["admin-analytics"] });
+      qc.invalidateQueries({ queryKey: ["all-shipments"] });
+    },
+    onError: (_error, vars) => {
+      qc.invalidateQueries({ queryKey: ["shipment", vars.shipmentId] });
+      qc.invalidateQueries({ queryKey: ["tracking"] });
+      qc.invalidateQueries({ queryKey: ["my-shipments"] });
+      qc.invalidateQueries({ queryKey: ["courier-shipments"] });
+      qc.invalidateQueries({ queryKey: ["courier-analytics"] });
     },
   });
 }

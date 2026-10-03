@@ -1,5 +1,17 @@
 import apiClient from "@/lib/apiClient";
-import type { HubInput } from "@/types";
+import type { AdminHubQuery, AdminUserQuery, HubInput } from "@/types";
+
+function toQuery(params?: object) {
+  if (!params) return "";
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      query.set(key, String(value));
+    }
+  });
+  const serialized = query.toString();
+  return serialized ? `?${serialized}` : "";
+}
 
 export function getAdminAnalytics() {
   return apiClient("/analytics/admin");
@@ -9,8 +21,8 @@ export function getDashboardStats() {
 }
 
 // --- Users ---
-export function getAllUsers() {
-  return apiClient<unknown>("/admin/users");
+export function getAllUsers(query?: AdminUserQuery) {
+  return apiClient<unknown>(`/admin/users${toQuery(query)}`);
 }
 export function updateUserStatus(id: string, status: "ACTIVE" | "SUSPENDED") {
   return apiClient(`/admin/users/${id}/status`, {
@@ -28,8 +40,8 @@ export function assignCourier(shipmentId: string, courierId: string) {
 }
 
 // --- Hubs ---
-export function getAllHubs() {
-  return apiClient<unknown>("/hubs");
+export function getAllHubs(query?: AdminHubQuery) {
+  return apiClient<unknown>(`/hubs${toQuery(query)}`);
 }
 export function createHub(data: HubInput) {
   return apiClient("/hubs", { method: "POST", body: data });

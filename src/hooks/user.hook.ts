@@ -7,6 +7,7 @@ export function useUpdateProfile() {
     mutationFn: (payload: UpdateProfilePayload) => updateProfile(payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["user"] });
+      qc.invalidateQueries({ queryKey: ["courier-profile"] });
     },
   });
 }
@@ -17,6 +18,7 @@ export function useUploadProfileImage() {
     mutationFn: (file: File) => uploadProfileImage(file),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["user"] });
+      qc.invalidateQueries({ queryKey: ["courier-profile"] });
     },
   });
 }

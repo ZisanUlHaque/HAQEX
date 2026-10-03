@@ -14,6 +14,7 @@ export type ShipmentStatus =
   | "PICKED_UP"
   | "AT_ORIGIN_HUB"
   | "IN_TRANSIT"
+  | "AT_DESTINATION_HUB"
   | "OUT_FOR_DELIVERY"
   | "DELIVERED"
   | "DELIVERY_FAILED"
@@ -23,7 +24,7 @@ export type ShipmentStatus =
   | "RETURNED"
   | "FAILED";
 
-export type PaymentStatus = "UNPAID" | "PAID" | "REFUNDED" | "FAILED";
+export type PaymentStatus = "UNPAID" | "PENDING" | "PAID" | "REFUNDED" | "FAILED";
 
 export type AddressInput = {
   name: string;
@@ -70,6 +71,7 @@ export type ShipmentListQuery = {
   limit?: number;
   status?: ShipmentStatus;
   paymentStatus?: PaymentStatus;
+  courierId?: string;
   search?: string;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
@@ -114,6 +116,9 @@ export type Shipment = {
   trackingEvents?: TrackingEvent[];
   customer?: { id: string; name: string; email: string; phone: string | null };
   courier?: { id: string; name: string; phone: string | null } | null;
+  originHub?: { id: string; name: string; code: string; city: string } | null;
+  destinationHub?: { id: string; name: string; code: string; city: string } | null;
+  currentHub?: { id: string; name: string; code: string; city: string } | null;
 };
 
 export type PaginatedShipments = {

@@ -24,7 +24,7 @@ export function getMyShipments(query?: ShipmentListQuery) {
 }
 
 export function getAllShipments(query?: ShipmentListQuery) {
-  return apiClient(`/shipments/all${toQuery(query)}`);
+  return apiClient<unknown>(`/shipments/all${toQuery(query)}`);
 }
 
 export function getShipmentById(id: string) {

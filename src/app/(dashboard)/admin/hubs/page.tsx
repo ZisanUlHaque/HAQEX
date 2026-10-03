@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { MapPin, Pencil, Plus, RefreshCw, Trash2, Warehouse } from "lucide-react";
 import { useAllHubs, useCreateHub, useDeleteHub, useUpdateHub } from "@/hooks";
 import type { Hub, HubInput } from "@/types";
@@ -14,6 +14,7 @@ import {
   getErrorMessage,
   PageHeader,
   QueryError,
+  responseMeta,
   responseList,
   SearchField,
   StatusPill,
@@ -39,33 +40,30 @@ function formatDate(value: string) {
 }
 
 export default function AdminHubsPage() {
-  const hubsQuery = useAllHubs();
+  const [search, setSearch] = useState("");
+  const [city, setCity] = useState("");
+  const [status, setStatus] = useState<Hub["status"] | "">("");
+  const [page, setPage] = useState(1);
+  const hubsQuery = useAllHubs({
+    page,
+    limit: PAGE_SIZE,
+    search: search.trim() || undefined,
+    city: city.trim() || undefined,
+    status: status || undefined,
+  });
   const createMutation = useCreateHub();
   const updateMutation = useUpdateHub();
   const deleteMutation = useDeleteHub();
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("");
-  const [page, setPage] = useState(1);
   const [formHub, setFormHub] = useState<Hub>();
   const [formValues, setFormValues] = useState<HubInput>(emptyHub);
   const [formOpen, setFormOpen] = useState(false);
   const [hubToDelete, setHubToDelete] = useState<Hub>();
   const saving = createMutation.isPending || updateMutation.isPending;
   const hubs = responseList<Hub>(hubsQuery.data);
-  const filtered = useMemo(() => {
-    const needle = search.trim().toLowerCase();
-    return hubs.filter((hub) => {
-      const matchesSearch =
-        !needle ||
-        hub.name?.toLowerCase().includes(needle) ||
-        hub.code?.toLowerCase().includes(needle) ||
-        hub.city?.toLowerCase().includes(needle) ||
-        hub.district?.toLowerCase().includes(needle);
-      return matchesSearch && (!status || hub.status === status);
-    });
-  }, [hubs, search, status]);
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const pageRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const meta = responseMeta(hubsQuery.data);
+  const total = typeof meta?.total === "number" ? meta.total : hubs.length;
+  const totalPages = typeof meta?.totalPages === "number" ? Math.max(meta.totalPages, 1) : Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const pageRows = hubs;
 
   const openCreate = () => {
     setFormHub(undefined);
@@ -138,7 +136,8 @@ export default function AdminHubsPage() {
       />
       <AdminSurface className="overflow-hidden">
         <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center">
-          <SearchField value={search} onChange={(value) => { setSearch(value); setPage(1); }} placeholder="Search hub, code or location" />
+          <SearchField value={search} onChange={(value) => { setSearch(value); setPage(1); }} placeholder="Search hub name or code" />
+          <input value={city} onChange={(event) => { setCity(event.target.value); setPage(1); }} aria-label="Filter hubs by city" placeholder="Filter city" className="h-10 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" />
           <select value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }} aria-label="Filter hubs by status" className="h-10 rounded-xl border border-input bg-background px-3 text-sm">
             <option value="">All statuses</option>
             <option value="ACTIVE">Active</option>
@@ -147,14 +146,14 @@ export default function AdminHubsPage() {
           <Button type="button" variant="outline" onClick={() => void hubsQuery.refetch()} disabled={hubsQuery.isFetching}>
             <RefreshCw className={hubsQuery.isFetching ? "animate-spin" : ""} /> Refresh
           </Button>
-          <span className="whitespace-nowrap px-1 text-xs text-muted-foreground">{filtered.length} hubs</span>
+          <span className="whitespace-nowrap px-1 text-xs text-muted-foreground">{total} hubs</span>
         </div>
         {hubsQuery.isError ? (
           <div className="p-4"><QueryError message={getErrorMessage(hubsQuery.error)} onRetry={() => void hubsQuery.refetch()} /></div>
         ) : hubsQuery.isLoading ? (
           <div className="space-y-3 p-5"><AdminSkeleton rows={5} /></div>
-        ) : filtered.length === 0 ? (
-          <EmptyState title={hubs.length === 0 ? "No hubs configured" : "No matching hubs"} description={hubs.length === 0 ? "Create a hub to start building your network." : "Try another search or status filter."} />
+        ) : hubs.length === 0 ? (
+          <EmptyState title={total === 0 ? "No hubs configured" : "No matching hubs"} description={total === 0 ? "Create a hub to start building your network." : "Try another search or status filter."} />
         ) : (
           <>
             <div className="overflow-x-auto">

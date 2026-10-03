@@ -5,8 +5,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ComponentType, type ReactNode } from "react";
 import {
   BarChart3,
+  ClipboardList,
   ChevronLeft,
   ChevronRight,
+  Clock3,
   CreditCard,
   LayoutDashboard,
   LogOut,
@@ -14,12 +16,12 @@ import {
   Package,
   Plus,
   Search,
-  Settings2,
   Truck,
   UserRound,
   Users,
   Warehouse,
   X,
+  Activity,
 } from "lucide-react";
 import Logo from "@/app/assets/svg/Logo";
 import { Button } from "@/components/ui/button";
@@ -44,28 +46,63 @@ const navByRole: Record<ShellRole, NavSection[]> = {
     ] },
   ],
   COURIER: [
-    { name: "Workspace", links: [
-      { name: "Overview", href: "/courier", icon: LayoutDashboard },
-      { name: "My Jobs", href: "/courier/shipments", icon: Truck },
-      { name: "Profile", href: "/courier/profile", icon: UserRound },
-    ] },
+    {
+      name: "Main",
+      links: [
+        { name: "Overview", href: "/courier", icon: LayoutDashboard },
+        { name: "My Deliveries", href: "/courier/shipments", icon: Truck },
+        { name: "Tracking", href: "/courier/tracking", icon: Search },
+      ],
+    },
+    {
+      name: "Operations",
+      links: [
+        { name: "Hubs", href: "/courier/hubs", icon: Warehouse },
+        { name: "Delivery History", href: "/courier/history", icon: Clock3 },
+      ],
+    },
+    {
+      name: "Performance",
+      links: [{ name: "Analytics", href: "/courier/analytics", icon: Activity }],
+    },
+    {
+      name: "Account",
+      links: [{ name: "Profile", href: "/courier/profile", icon: UserRound }],
+    },
   ],
   ADMIN: [
-    { name: "Overview", links: [
-      { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    ] },
-    { name: "Operations", links: [
-      { name: "Shipments", href: "/admin/shipments", icon: Package },
-      { name: "Users", href: "/admin/users", icon: Users },
-      { name: "Hubs", href: "/admin/hubs", icon: Warehouse },
-      { name: "Payments", href: "/admin/payments", icon: CreditCard },
-    ] },
-    { name: "Insights", links: [
-      { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
-    ] },
-    { name: "System", links: [
-      { name: "Settings", href: "/admin/settings", icon: Settings2 },
-    ] },
+    {
+      name: "Overview",
+      links: [
+        { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+        { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+      ],
+    },
+    {
+      name: "Operations",
+      links: [
+        { name: "Shipments", href: "/admin/shipments", icon: Package },
+        { name: "Tracking", href: "/admin/tracking", icon: Search },
+        { name: "Couriers", href: "/admin/couriers", icon: Truck },
+        { name: "Users", href: "/admin/users", icon: Users },
+      ],
+    },
+    {
+      name: "Network",
+      links: [{ name: "Hubs", href: "/admin/hubs", icon: Warehouse }],
+    },
+    {
+      name: "Finance",
+      links: [{ name: "Payments", href: "/admin/payments", icon: CreditCard }],
+    },
+    {
+      name: "Reports",
+      links: [{ name: "Reports", href: "/admin/reports", icon: ClipboardList }],
+    },
+    {
+      name: "Account",
+      links: [{ name: "Profile & Settings", href: "/admin/settings", icon: UserRound }],
+    },
   ],
 };
 
@@ -188,10 +225,10 @@ export default function DashboardShell({
           collapsed && role === "ADMIN" && !mobile && "md:justify-center md:px-1",
         )}>
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-xs font-bold text-primary">
-            {user?.name?.slice(0, 1).toUpperCase() || "A"}
+            {user?.name?.slice(0, 1).toUpperCase() || role.slice(0, 1)}
           </span>
           <div className={cn("min-w-0", collapsed && role === "ADMIN" && !mobile && "md:hidden")}>
-            <p className="truncate text-xs font-semibold">{user?.name || "Admin account"}</p>
+            <p className="truncate text-xs font-semibold">{user?.name || `${role.toLowerCase()} account`}</p>
             <p className="truncate text-[11px] text-muted-foreground">{user?.email || role.toLowerCase()}</p>
           </div>
         </div>
