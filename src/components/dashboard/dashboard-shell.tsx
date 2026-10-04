@@ -36,14 +36,26 @@ type NavSection = { name: string; links: NavLink[] };
 
 const navByRole: Record<ShellRole, NavSection[]> = {
   CUSTOMER: [
-    { name: "Workspace", links: [
-      { name: "Overview", href: "/customer", icon: LayoutDashboard },
-      { name: "My Shipments", href: "/customer/shipments", icon: Package },
-      { name: "New Shipment", href: "/customer/shipments/create", icon: Plus },
-      { name: "Payments", href: "/customer/payments", icon: CreditCard },
-      { name: "Track Parcel", href: "/track", icon: Search },
-      { name: "Profile", href: "/customer/profile", icon: UserRound },
-    ] },
+    {
+      name: "Main",
+      links: [
+        { name: "Overview", href: "/customer", icon: LayoutDashboard },
+        { name: "My Shipments", href: "/customer/shipments", icon: Package },
+        { name: "Create Shipment", href: "/customer/shipments/create", icon: Plus },
+        { name: "Track Shipment", href: "/track", icon: Search },
+      ],
+    },
+    {
+      name: "Payments",
+      links: [{ name: "Payment History", href: "/customer/payments", icon: CreditCard }],
+    },
+    {
+      name: "Account",
+      links: [
+        { name: "Profile", href: "/customer/profile", icon: UserRound },
+        { name: "Settings", href: "/customer/profile?tab=settings", icon: UserRound },
+      ],
+    },
   ],
   COURIER: [
     {
@@ -114,6 +126,18 @@ function getResponseUser(value: unknown) {
   return typeof nested === "object" && nested !== null ? nested : undefined;
 }
 
+function getRoutePath(href: string) {
+  return href.split("?")[0];
+}
+
+function matchesPath(pathname: string, href: string) {
+  const routePath = getRoutePath(href);
+  const isDashboardRoot = ["/admin", "/customer", "/courier"].includes(routePath);
+  return isDashboardRoot
+    ? pathname === routePath
+    : pathname === routePath || pathname.startsWith(`${routePath}/`);
+}
+
 export default function DashboardShell({
   children,
   role = "CUSTOMER",
@@ -130,21 +154,19 @@ export default function DashboardShell({
   const { mutate: logout, isPending: loggingOut } = useLogout();
   const queryClient = useQueryClient();
   const sections = navByRole[role];
-  const currentLabel =
-    sections.flatMap((section) => section.links).find((link) =>
-      link.href === "/admin" || link.href === "/customer" || link.href === "/courier"
-        ? pathname === link.href
-        : pathname === link.href || pathname.startsWith(`${link.href}/`),
-    )?.name ?? "Workspace";
+  const activeLink = sections
+    .flatMap((section) => section.links)
+    .filter((link) => matchesPath(pathname, link.href))
+    .sort((a, b) => getRoutePath(b.href).length - getRoutePath(a.href).length)[0];
+  const activeRouteLength = activeLink ? getRoutePath(activeLink.href).length : 0;
+  const currentLabel = activeLink?.name ?? "Workspace";
 
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
 
   const isActive = (href: string) =>
-    href === "/admin" || href === "/customer" || href === "/courier"
-      ? pathname === href
-      : pathname === href || pathname.startsWith(`${href}/`);
+    matchesPath(pathname, href) && getRoutePath(href).length === activeRouteLength;
 
   const handleLogout = () => {
     logout(undefined, {

@@ -6,3 +6,4 @@ export * from "./tracking.hook";
 export * from "./user.hook";
 export * from "./admin.hook";
 export * from "./courier.hook";
+export * from "./customer.hook";
