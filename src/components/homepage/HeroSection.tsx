@@ -1,194 +1,186 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Info, Play, Apple } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ArrowRight, Ship, MapPin } from "lucide-react";
 
 export default function HeroSection() {
-  const [tab, setTab] = useState<"track" | "ship">("track");
-  const [tn, setTn] = useState("");
-
-  const onTrack = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!tn.trim()) return;
-    window.location.href = `/track?tn=${encodeURIComponent(tn.trim())}`;
-  };
-
   return (
-    <section className="relative flex min-h-[100svh] w-full flex-col overflow-hidden bg-zinc-50 pt-20 pb-8 md:min-h-[850px] md:pt-24 md:pb-12 lg:min-h-[900px]">
-
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/hero.png" // Make sure this matches your image path
-          alt="Port crane lifting shipping container"
-          fill
-          priority
-          className="object-cover object-center"
-          sizes="100vw"
+    <section className="relative isolate w-full overflow-hidden bg-background text-foreground">
+      {/* Soft ambient + dots */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute left-1/2 top-0 h-[520px] w-[900px] -translate-x-1/2 rounded-full bg-chart-1/10 blur-3xl" />
+        <div className="absolute bottom-0 right-0 h-[360px] w-[360px] rounded-full bg-primary/10 blur-3xl" />
+        <div
+          className="absolute inset-0 opacity-[0.04] dark:opacity-[0.07]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)",
+            backgroundSize: "26px 26px",
+          }}
         />
-        {/* Gradients to ensure text readability over the image */}
       </div>
 
-      <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl flex-1 flex-col px-4 sm:px-6 lg:px-10">
-        
-        {/* TOP: Headline left  |  copy + CTA right */}
-        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:gap-6">
-          {/* LEFT HEADLINE */}
-          <div className="lg:col-span-8">
-            <h1 className="text-[2.35rem] font-black uppercase leading-[1.02] tracking-tight text-zinc-950 sm:text-5xl md:text-6xl lg:text-[4.25rem]">
-              BRINGING{" "}
-              {/* Note: Ensure 'text-chart-1' in your tailwind config matches the orange in the design */}
-              <span className="text-chart-1">THE WORLD</span>
-              <br />
-              CLOSER,
-              <br />
-              ONE DELIVERY AT A
-              <br />
-              TIME
-            </h1>
-          </div>
+      {/* Giant watermark */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-[42%] z-0 flex -translate-y-1/2 justify-center overflow-hidden lg:left-[18%] lg:justify-start"
+      >
+        <span className="select-none text-[22vw] font-black uppercase leading-none tracking-tighter text-foreground/[0.045] dark:text-foreground/[0.07] sm:text-[18vw] lg:text-[14rem]">
+          HAQ
+        </span>
+      </div>
 
-          {/* RIGHT COPY + BUTTON */}
-          <div className="flex flex-col gap-5 lg:col-span-4 lg:pt-2 lg:pl-4">
-            <p className="max-w-md text-[15px] font-medium leading-relaxed text-zinc-800 md:text-zinc-700">
-              We provide reliable shipping whenever you need it. With us, you
-              get precision, speed, and confidence at every step.
+      <div className="relative z-10 mx-auto max-w-7xl px-5 pb-16 pt-8 sm:px-6 md:pb-20 md:pt-8 lg:px-10 lg:pb-24 lg:pt-10">
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-8 xl:gap-10">
+          <div className="flex flex-col justify-center lg:col-span-5">
+            <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-border/70 bg-card/70 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground shadow-sm backdrop-blur-md sm:text-[11px]">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-chart-1 opacity-50" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-chart-1" />
+              </span>
+              Global logistics · Real-time tracking
+            </div>
+
+            <h1 className="mb-5 text-balance text-[2.6rem] font-black leading-[0.98] tracking-tight text-foreground sm:text-5xl md:text-6xl lg:text-[3.65rem] xl:text-[4.1rem]">
+              Seamless
+              <br />
+              Logistics
+              <br />
+              <span className="bg-gradient-to-r from-chart-1 via-emerald-400 to-chart-2 bg-clip-text text-transparent">
+                Solutions
+              </span>
+              <br />
+              for Your
+              <br />
+              Business
+            </h1>
+
+            <p className="mb-8 max-w-[26rem] text-[15px] leading-relaxed text-muted-foreground sm:text-base">
+              Managing logistics doesn&apos;t have to be complex. We streamline
+              your supply chain with efficient, cost-effective, and reliable
+              delivery — from first mile to last.
             </p>
-            <div>
-              <Link href="/contact">
+
+            <div className="flex flex-wrap items-center gap-3">
+              <Link href="/services">
                 <button
                   type="button"
-                  className="inline-flex h-11 items-center justify-center rounded-full bg-chart-1 px-7 text-sm font-bold text-white shadow-md shadow-chart-1/20 transition hover:opacity-90 active:scale-[0.98]"
+                  className="group inline-flex h-12 items-center gap-2.5 rounded-full bg-chart-1 pl-6 pr-1.5 text-sm font-bold text-emerald-950 shadow-lg shadow-chart-1/25 transition hover:bg-chart-2 hover:shadow-chart-1/35 active:scale-[0.98]"
                 >
-                  Request a Quote
+                  View Services
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-950 text-chart-1 transition-transform duration-300 group-hover:translate-x-0.5">
+                    <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+                  </span>
+                </button>
+              </Link>
+
+              <Link href="/track">
+                <button
+                  type="button"
+                  className="inline-flex h-12 items-center gap-2 rounded-full border border-border bg-card/80 px-5 text-sm font-semibold text-foreground shadow-sm backdrop-blur-md transition hover:border-chart-1/40 hover:bg-card"
+                >
+                  <MapPin className="h-4 w-4 text-chart-1" />
+                  Track parcel
                 </button>
               </Link>
             </div>
-          </div>
-        </div>
 
-        <div className="mt-auto pt-16 sm:w-[min(100%,400px)] md:pt-24 lg:pt-32">
-          <div className="rounded-3xl border border-zinc-100 bg-white p-5 shadow-2xl shadow-black/10 sm:p-7">
-            {/* Tabs with underline */}
-            <div className="mb-6 flex items-center gap-6 border-b border-zinc-100">
-              <button
-                type="button"
-                onClick={() => setTab("track")}
-                className={cn(
-                  "relative pb-3 text-sm font-bold transition-colors",
-                  tab === "track" ? "text-zinc-950" : "text-zinc-400 hover:text-zinc-600"
-                )}
-              >
-                Track Shipment
-                {tab === "track" && (
-                  <span className="absolute inset-x-0 bottom-0 h-[2px] rounded-full bg-chart-1" />
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() => setTab("ship")}
-                className={cn(
-                  "relative pb-3 text-sm font-bold transition-colors",
-                  tab === "ship" ? "text-zinc-950" : "text-zinc-400 hover:text-zinc-600"
-                )}
-              >
-                Ship Order
-                {tab === "ship" && (
-                  <span className="absolute inset-x-0 bottom-0 h-[2px] rounded-full bg-chart-1" />
-                )}
-              </button>
+          </div>
+
+          <div className="relative mx-auto h-[480px] w-full max-w-xl sm:h-[540px] lg:col-span-7 lg:mx-0 lg:h-[600px] lg:max-w-none">
+            <div className="absolute right-0 top-[8%] z-10 h-[78%] w-[72%] overflow-hidden rounded-[1.75rem] border border-white/20 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.35)] sm:w-[68%] lg:right-0 lg:top-6 lg:h-[520px] lg:w-[400px] xl:w-[430px]">
+              <Image
+                src="/cargo.png"
+                alt="Stacked shipping containers"
+                fill
+                priority
+                className="object-cover object-center transition duration-700 ease-out hover:scale-[1.04]"
+                sizes="(max-width: 1024px) 70vw, 430px"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3 text-white">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/65">
+                    Live fleet
+                  </p>
+                  <p className="text-sm font-bold tracking-tight">
+                    Port → Hub network
+                  </p>
+                </div>
+                <span className="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold backdrop-blur-md ring-1 ring-white/20">
+                  24/7
+                </span>
+              </div>
             </div>
 
-            {tab === "track" ? (
-              <form onSubmit={onTrack} className="space-y-4">
-                {/* Input */}
-                <div className="relative">
-                  <MapPin className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-chart-1" />
-                  <input
-                    type="text"
-                    value={tn}
-                    onChange={(e) => setTn(e.target.value)}
-                    placeholder="Track Order"
-                    className="h-14 w-full rounded-full border border-transparent bg-zinc-50 pl-12 pr-4 text-sm font-medium text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-chart-1/40 focus:bg-white focus:ring-2 focus:ring-chart-1/15"
-                    required
-                  />
-                </div>
-
-                {/* Track CTA */}
-                <button
-                  type="submit"
-                  className="flex h-14 w-full items-center justify-center rounded-full bg-chart-1 text-sm font-bold text-white shadow-sm transition hover:opacity-90 active:scale-[0.99]"
-                >
-                  Track
-                </button>
-
-                {/* Help row */}
-                <div className="flex items-center justify-between px-1 pt-1 text-[11px] font-semibold text-zinc-600 sm:text-xs">
-                  <button type="button" className="hover:text-chart-1 transition-colors">
-                    Multiple Tracking Numbers
-                  </button>
-                  <Link
-                    href="/contact"
-                    className="inline-flex items-center gap-1.5 text-zinc-400 hover:text-zinc-900"
-                  >
-                    <Info className="h-4 w-4" />
-                    Need Help
-                  </Link>
-                </div>
-
-                {/* Store badges */}
-                <div className="grid grid-cols-2 gap-3 pt-2">
-                  <a
-                    href="#"
-                    className="flex items-center justify-center gap-2.5 rounded-2xl bg-zinc-950 px-2 py-3 text-white transition hover:bg-zinc-800"
-                  >
-                    <Play className="h-4 w-4 shrink-0 fill-current" />
-                    <span className="text-left leading-none">
-                      <span className="block text-[9px] uppercase tracking-wide text-zinc-400">
-                        Get it on
-                      </span>
-                      <span className="block text-[12px] font-bold">Google Play</span>
-                    </span>
-                  </a>
-                  <a
-                    href="#"
-                    className="flex items-center justify-center gap-2.5 rounded-2xl bg-zinc-950 px-2 py-3 text-white transition hover:bg-zinc-800"
-                  >
-                    <Apple className="h-[18px] w-[18px] shrink-0 fill-current" />
-                    <span className="text-left leading-none">
-                      <span className="block text-[9px] text-zinc-400">
-                        Download on the
-                      </span>
-                      <span className="block text-[12px] font-bold">App Store</span>
-                    </span>
-                  </a>
-                </div>
-              </form>
-            ) : (
-              <div className="space-y-4 py-2 text-center">
-                <p className="text-sm font-medium text-zinc-600">
-                  Create a shipment or get an instant delivery quote.
+            {/* Floating inventory card */}
+            <div className="absolute left-0 top-0 z-30 w-[min(100%,248px)] rounded-2xl border border-border/50 bg-card/95 p-3.5 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:left-2 sm:top-4 sm:w-[260px] lg:left-4 lg:top-10 lg:w-[280px]">
+              <div className="mb-2.5 flex items-start justify-between gap-2">
+                <p className="text-[11px] leading-snug text-muted-foreground sm:text-xs">
+                  Maintaining optimal inventory is key to meeting demand
+                  efficiently.
                 </p>
-                <Link href="/pricing" className="block">
-                  <button
-                    type="button"
-                    className="flex h-14 w-full items-center justify-center rounded-full bg-zinc-950 text-sm font-bold text-white transition hover:bg-zinc-800"
-                  >
-                    Calculate Shipping Fee
-                  </button>
-                </Link>
-                <Link href="/login" className="block">
-                  <button
-                    type="button"
-                    className="flex h-12 w-full items-center justify-center rounded-full border border-zinc-200 bg-white text-sm font-semibold text-zinc-900 transition hover:bg-zinc-50"
-                  >
-                    Login to Ship
-                  </button>
-                </Link>
+                <Ship className="mt-0.5 h-4 w-4 shrink-0 text-chart-1" />
               </div>
-            )}
+              <div className="relative h-[120px] w-full overflow-hidden rounded-xl bg-muted sm:h-[128px]">
+                <Image
+                  src="/hero.png"
+                  alt="Container ship at port"
+                  fill
+                  className="object-cover"
+                  sizes="280px"
+                />
+              </div>
+              <div className="mt-2.5 flex items-center justify-between gap-2 text-[11px]">
+                <span className="font-semibold text-foreground">In transit</span>
+                <span className="rounded-full bg-chart-1/15 px-2.5 py-0.5 text-[10px] font-bold text-chart-1 ring-1 ring-chart-1/20">
+                  On schedule
+                </span>
+              </div>
+            </div>
+
+            {/* Green scribble arrow */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute left-[30%] top-[25%] z-40 hidden lg:block"
+            >
+              <svg
+                width="140"
+                height="150"
+                viewBox="0 0 140 150"
+                fill="none"
+                className="text-chart-1 drop-shadow-sm"
+              >
+                <path
+                  d="M95 8 C 115 28, 125 48, 108 62 C 88 78, 70 55, 82 42 C 98 25, 120 55, 105 85 C 88 120, 55 125, 28 138"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                />
+                <path
+                  d="M22 128 L 28 140 L 42 132"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                />
+              </svg>
+            </div>
+
+            {/* Vertical oval slice */}
+            <div className="absolute bottom-2 left-[20%] z-20 h-[210px] w-[108px] overflow-hidden rounded-full border-[3px] border-white shadow-[0_18px_40px_-12px_rgba(0,0,0,0.4)] sm:bottom-4 sm:left-[18%] sm:h-[250px] sm:w-[120px] lg:bottom-8 lg:left-[24%] lg:h-[290px] lg:w-37.5 dark:border-border">
+              <Image
+                src="/rider.png"
+                alt="Port cranes and containers"
+                fill
+                className="object-cover object-center"
+                sizes="136px"
+              />
+            </div>
           </div>
         </div>
       </div>
