@@ -1,36 +1,122 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HAQEX – Courier & Logistics Platform Frontend
 
-## Getting Started
+HAQEX is a modern courier and logistics management platform built with Next.js. It provides a customer-facing shipping experience, courier operations workflows, and admin dashboards for monitoring logistics activity, payments, analytics, and user operations.
 
-First, run the development server:
+## Overview
+
+This frontend app includes:
+
+- Public marketing pages for the logistics brand
+- Shipment tracking and status management
+- Customer shipment creation and payment flow
+- Courier dashboard with shipment history and delivery workflow
+- Admin analytics, users, hubs, reports, and finance monitoring
+- Authentication and role-based access control
+- Responsive UI using Next.js, React, TypeScript, and Tailwind CSS
+
+## Tech Stack
+
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS
+- shadcn/ui style components
+- TanStack React Query
+- Recharts for analytics dashboards
+- Google OAuth integration
+- Zod validation
+
+## Project Structure
+
+```bash
+src/
+├── app/                  # App router pages and route groups
+│   ├── (public)/         # Marketing, auth, payment, tracking pages
+│   ├── (dashboard)/      # Customer, courier, and admin dashboards
+│   └── layout.tsx
+├── components/           # Reusable UI and dashboard components
+├── hooks/                # Data fetching and custom hooks
+├── lib/                  # Shared utilities and helpers
+├── providers/            # App providers
+├── types/                # Type definitions
+├── validation/           # Zod schemas and validation
+└── api/                  # API clients and service helpers
+```
+
+## Prerequisites
+
+- Node.js 20+
+- npm
+- A running backend API for shipment, auth, and payment data
+
+## Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/ZisanUlHaque/HAQEX.git
+cd courier-and-logistics-platform-frontend
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Create your environment file:
+
+```bash
+cp .env.example .env
+```
+
+4. Update `.env` with your project values:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=http://localhost:5000
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id
+```
+
+## Running the App
+
+### Development mode
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open: http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Production build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run start
+```
 
-## Learn More
+## Available Scripts
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run dev      # Start the Next.js development server
+npm run build    # Create a production build
+npm run start    # Run the production build
+npm run lint     # Run Biome lint checks
+npm run format   # Format the project with Biome
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Environment Variables
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Variable | Description |
+| --- | --- |
+| `NEXT_PUBLIC_API_BASE_URL` | Base URL for the backend API |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Google OAuth client ID used for login |
 
-## Deploy on Vercel
+## Notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- This repository is the frontend application only.
+- A compatible backend API must be running for customer, courier, and admin data to be available.
+- The project uses route groups and role-based app structure for customer, courier, and admin experiences.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+
+This project is currently for educational and assignment use.
