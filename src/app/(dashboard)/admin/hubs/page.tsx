@@ -138,7 +138,7 @@ export default function AdminHubsPage() {
         <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center">
           <SearchField value={search} onChange={(value) => { setSearch(value); setPage(1); }} placeholder="Search hub name or code" />
           <input value={city} onChange={(event) => { setCity(event.target.value); setPage(1); }} aria-label="Filter hubs by city" placeholder="Filter city" className="h-10 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" />
-          <select value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }} aria-label="Filter hubs by status" className="h-10 rounded-xl border border-input bg-background px-3 text-sm">
+          <select value={status} onChange={(event) => { const nextStatus = event.target.value as Hub["status"] | ""; setStatus(nextStatus); setPage(1); }} aria-label="Filter hubs by status" className="h-10 rounded-xl border border-input bg-background px-3 text-sm">
             <option value="">All statuses</option>
             <option value="ACTIVE">Active</option>
             <option value="INACTIVE">Inactive</option>

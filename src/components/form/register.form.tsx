@@ -41,15 +41,17 @@ export function RegisterForm() {
   const { mutate: registration, isPending: registrationPending } =
     useRegistration();
 
+  const defaultValues: RegisterValues = {
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+    role: "CUSTOMER",
+  };
+
   const form = useForm({
-    defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      password: "",
-      confirmPassword: "",
-      role: "CUSTOMER",
-    } satisfies RegisterValues,
+    defaultValues,
     validators: {
       onSubmit: RegisterZodSchema,
     },

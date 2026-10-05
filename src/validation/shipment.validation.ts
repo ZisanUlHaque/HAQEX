@@ -6,14 +6,14 @@ const addressSchema = z.object({
   addressLine: z.string().min(5, "Address is required"),
   city: z.string().min(2, "City is required"),
   district: z.string().min(2, "District is required"),
-  postalCode: z.string().optional(),
+  postalCode: z.string(),
 });
 
 const itemSchema = z.object({
   description: z.string().min(1, "Description required"),
   quantity: z.number().int().positive(),
-  weight: z.number().positive().optional(),
-  declaredValue: z.number().nonnegative().optional(),
+  weight: z.number().positive(),
+  declaredValue: z.number().nonnegative(),
 });
 
 export const CreateShipmentZodSchema = z.object({
@@ -25,15 +25,15 @@ export const CreateShipmentZodSchema = z.object({
       "LARGE_PARCEL",
       "FRAGILE",
       "HAZARDOUS",
-    ])
-    .default("SMALL_PARCEL"),
+    ]),
   weight: z.number().positive("Weight must be > 0"),
-  quantity: z.number().int().positive().default(1),
-  declaredValue: z.number().nonnegative().optional(),
-  deliveryFee: z.number().nonnegative().optional(),
-  codAmount: z.number().nonnegative().optional(),
-  specialInstructions: z.string().max(500).optional(),
-  pickupSchedule: z.string().optional(),
+  quantity: z.number().int().positive(),
+  declaredValue: z.number().nonnegative(),
+  deliveryFee: z.number().nonnegative(),
+  codAmount: z.number().nonnegative(),
+  specialInstructions: z.string().max(500),
+  pickupSchedule: z.string(),
+  isInterCity: z.boolean(),
   pickupAddress: addressSchema,
   deliveryAddress: addressSchema,
   items: z.array(itemSchema).min(1, "At least one item required"),

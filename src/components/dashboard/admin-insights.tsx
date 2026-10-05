@@ -112,7 +112,9 @@ export default function AdminInsights({ mode }: { mode: "analytics" | "reports" 
       {mode === "analytics" && (
         <>
           {analyticsQuery.isLoading && !summaryChart ? (
-            <AdminSurface className="h-[560px] animate-pulse rounded-[26px] bg-muted/50" />
+            <AdminSurface className="h-[560px] animate-pulse rounded-[26px] bg-muted/50">
+              <div className="h-full" aria-hidden="true" />
+            </AdminSurface>
           ) : chart ? (
             <AnalyticsChart
               data={chart}

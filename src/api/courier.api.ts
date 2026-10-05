@@ -8,7 +8,11 @@ function toQuery(params?: CourierShipmentQuery) {
   if (!params) return "";
   const query = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== "") {
+    if (
+      value !== undefined &&
+      value !== null &&
+      !(typeof value === "string" && value.length === 0)
+    ) {
       query.set(key, String(value));
     }
   });

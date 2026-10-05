@@ -13,14 +13,13 @@ export const RegisterZodSchema = z
     name: z.string().min(2, "Name must be at least 2 characters").max(100),
     email: z.email("Invalid email address"),
     password: passwordSchema,
-    role: z.enum(["CUSTOMER", "COURIER"]).optional(),
+    role: z.enum(["CUSTOMER", "COURIER"]),
     confirmPassword: z.string().min(1, "Please confirm your password"),
     phone: z
       .string()
       .refine((val) => val === "" || /^(?:\+?880|0)1[3-9]\d{8}$/.test(val), {
         message: "Please provide valid Bangladeshi number",
-      })
-      .optional(),
+      }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Password do not match",
