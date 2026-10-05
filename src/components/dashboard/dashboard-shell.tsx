@@ -27,7 +27,6 @@ import Logo from "@/app/assets/svg/Logo";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { useGetMe, useLogout } from "@/hooks";
-import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 
 type ShellRole = "CUSTOMER" | "COURIER" | "ADMIN";
@@ -152,7 +151,6 @@ export default function DashboardShell({
   const { data } = useGetMe();
   const user = getResponseUser(data) as { name?: string; email?: string } | undefined;
   const { mutate: logout, isPending: loggingOut } = useLogout();
-  const queryClient = useQueryClient();
   const sections = navByRole[role];
   const activeLink = sections
     .flatMap((section) => section.links)
@@ -172,7 +170,6 @@ export default function DashboardShell({
     logout(undefined, {
       onSuccess: () => {
         toast.add({ title: "Signed out", type: "success" });
-        queryClient.removeQueries();
         router.push("/login");
       },
       onError: (error) => {

@@ -16,7 +16,6 @@ import {
 import Logo from "@/app/assets/svg/Logo";
 import { toast } from "@/components/ui/toast";
 import { useGetMe, useLogout } from "@/hooks";
-import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 
 type AppRole = "ADMIN" | "CUSTOMER" | "COURIER";
@@ -43,7 +42,6 @@ export default function Header() {
 
   const { data, isLoading } = useGetMe();
   const { mutate: logout, isPending: loggingOut } = useLogout();
-  const queryClient = useQueryClient();
 
   const user = (data as any)?.data ?? data;
   const role = user?.role as AppRole | undefined;
@@ -57,7 +55,6 @@ export default function Header() {
           description: "See you next time",
           type: "success",
         });
-        queryClient.removeQueries({ queryKey: ["user"] });
         setUserMenuOpen(false);
         router.push("/");
       },
