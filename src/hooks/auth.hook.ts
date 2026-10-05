@@ -6,7 +6,12 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: userLogin,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["user"] }),
+    onSuccess: () =>
+      queryClient.fetchQuery({
+        queryKey: ["user"],
+        queryFn: getMe,
+        staleTime: 0,
+      }),
   });
 }
 export function useRegistration() {
@@ -43,7 +48,12 @@ export function useGoogleOAuth() {
 
   return useMutation({
     mutationFn: googleOAuth,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["user"] }),
+    onSuccess: () =>
+      queryClient.fetchQuery({
+        queryKey: ["user"],
+        queryFn: getMe,
+        staleTime: 0,
+      }),
   });
 }
 
