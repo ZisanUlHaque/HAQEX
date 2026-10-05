@@ -3,6 +3,8 @@ import HeroSection from "../../../components/homepage/HeroSection";
 import WhyUsSection from "@/components/homepage/WhyUsSection";
 import CtaSection from "@/components/homepage/CtaSection";
 import FaqSection from "@/components/homepage/FaqSection";
+import ServicesSection from "@/components/homepage/ServicesSection";
+import WeServeSection from "@/components/homepage/WeServeSection";
 
 export const metadata: Metadata = {
   title: "HAQEX | Modern Courier & Logistics Management",
@@ -37,6 +39,8 @@ export default function Page() {
     <>
       <HeroSection />
       <WhyUsSection />
+      <ServicesSection />
+      <WeServeSection />
       <FaqSection />
       <CtaSection/>
     </>
